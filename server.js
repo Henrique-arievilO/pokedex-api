@@ -6,6 +6,7 @@ const port = process.env.PORT || 3000;
 // Instrui o Express a utilizar seu parser interno para JSON
 app.use(express.json());
 
+//BASE ENDPOINT
 // Endpoint básico: raiz da API
 app.get('/', (req, res) => {
     res.send('Hello, this is my Pokedex API!');
@@ -33,9 +34,18 @@ const pokemons = [
     image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
     type: "Water",
     subtype: null
+  },
+  {
+    number: 25,
+    name: "Squirtle",
+    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
+    type: "Water",
+    subtype: null
   }
 ];
 
+
+//GET
 // Endpoint para listar todos os pokémons
 app.get('/api/pokemon', (req, res) => {
   res.json(pokemons);
@@ -52,6 +62,8 @@ app.get('/api/pokemon/:number', (req, res) => {
   }
 });
 
+
+//POST
 // Endpoint para criar um novo Pokémon
 app.post('/api/pokemon', (req, res) => {
   const newPokemon = req.body;
@@ -68,6 +80,48 @@ app.post('/api/pokemon', (req, res) => {
   return res.status(201).json(newPokemon);
 });
 
+
+//PUT
+// Endpoint PUT para atualizar um Pokémon existente identificado pelo seu número
+app.put('/api/pokemon/:number', (req, res) => {
+  const number = parseInt(req.params.number, 10);
+  const index = pokemons.findIndex(p => p.number === number);
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'Pokémon not found' });
+  }
+
+  const updatedPokemon = req.body;
+
+  // Validação: garantir que os campos essenciais estão presentes
+  if (!updatedPokemon.number || !updatedPokemon.name || !updatedPokemon.image || !updatedPokemon.type) {
+    return res.status(400).json({ error: "Os campos 'number', 'name', 'image' e 'type' são obrigatórios." });
+  }
+
+  // Atualiza o registro
+  pokemons[index] = updatedPokemon;
+
+  res.json(updatedPokemon);
+});
+
+//DELETE
+// Endpoint DELETE para remover um Pokémon pelo número
+app.delete('/api/pokemon/:number', (req, res) => {
+  const number = parseInt(req.params.number, 10);
+  const index = pokemons.findIndex(p => p.number === number);
+
+  if (index === -1) {
+    return res.status(404).json({ error: 'Pokémon not found' });
+  }
+
+  // Remove o Pokémon do array e retorna o registrado removido
+  const removedPokemon = pokemons.splice(index, 1);
+  
+  res.json(removedPokemon[0]);
+});
+
+
+//START SERVER
 // Inicia o servidor
 app.listen(port, () => {
     console.log(`Servidor rodando na porta ${port}.`);
