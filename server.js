@@ -1,137 +1,154 @@
-// Importa o Express
-const express = require('express');
+// 1. IMPORTS E CONFIGURAÇÕES INICIAIS
+// =====================================
+// Importa os módulos necessários:
+import express from 'express';
+import { Low } from 'lowdb';
+import { JSONFile } from 'lowdb/node';
+import path from 'path';
+import cors from 'cors';
+import { fileURLToPath } from 'url';
+
+// Define __filename e __dirname (não estão disponíveis automaticamente em ESM)
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
+// Cria a instância do Express e define a porta:
 const app = express();
 const port = process.env.PORT || 3000;
 
-// Midleware instrui o Express a utilizar seu parser interno para JSON
-app.use(express.json());
-app.use((req, res, next) => {
-  res.header("Access-Control-Allow-Origin", "*");
-  res.header("Access-Control-Allow-Methods", "GET, PUT, POST, DELETE, OPTIONS");
-  res.header("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept");
-  next();
-});
+// Define o caminho do arquivo do banco de dados e o adaptador:
+const dbFile = path.join(__dirname, 'db.json');
+const adapter = new JSONFile(dbFile);
 
-const cors = require('cors');
+// Passe a default data como segundo argumento para o Low:
+const db = new Low(adapter, { default: { pokemons: [] } });
+
+// Configura os middlewares:
+// - Parser JSON para interpretar o corpo das requisições
+app.use(express.json());
+// - Habilita o CORS para todas as requisições
 app.use(cors());
 
-//BASE ENDPOINT
-// Endpoint básico: raiz da API
+// Endpoint básico para teste da API (ex.: http://localhost:3000)
 app.get('/', (req, res) => {
-    res.send('Hello, this is my Pokedex API!');
+  res.send('Hello, this is my Pokedex API!');
 });
 
-// Dados fictícios para a Pokedéx
-const pokemons = [
-  {
-    number: 1,
-    name: "Bulbasaur",
-    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
-    type: "Grass",
-    subtype: "Poison"
-  },
-  {
-    number: 4,
-    name: "Charmander",
-    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png",
-    type: "Fire",
-    subtype: null
-  },
-  {
-    number: 7,
-    name: "Squirtle",
-    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
-    type: "Water",
-    subtype: null
-  },
-  {
-    number: 25,
-    name: "Squirtle",
-    image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
-    type: "Water",
-    subtype: null
-  }
-];
+// 2. INICIALIZAÇÃO DO BANCO DE DADOS E DEFINIÇÃO DOS ENDPOINTS
+// ==============================================================
+// Utilize uma função assíncrona autoexecutável para ler/inicializar os dados e definir os endpoints.
+(async () => {
+  // Lê os dados do arquivo; se estiver vazio, o lowdb já define db.data com a default data que passamos.
+  await db.read();
 
-
-//GET
-// Endpoint para listar todos os pokémons
-app.get('/api/pokemon', (req, res) => {
-  res.json(pokemons);
-});
-
-// Endpoint para obter detalhes de um pokémon pelo número
-app.get('/api/pokemon/:number', (req, res) => {
-  const number = parseInt(req.params.number, 10);
-  const foundPokemon = pokemons.find(p => p.number === number);
-  if (foundPokemon) {
-    res.json(foundPokemon);
-  } else {
-    res.status(404).json({ error: "Pokémon not found" });
-  }
-});
-
-
-//POST
-// Endpoint para criar um novo Pokémon
-app.post('/api/pokemon', (req, res) => {
-  const newPokemon = req.body;
-
-  // Validação simples: verificar se os campos obrigatórios foram enviados
-  if (!newPokemon.number || !newPokemon.name || !newPokemon.image || !newPokemon.type) {
-    return res.status(400).json({ error: "Os campos 'number', 'name', 'image' e 'type' são obrigatórios." });
+  // Se o array de pokémons estiver vazio (ou for a primeira vez), inicializa com os registros padrão.
+  if (db.data.pokemons.length === 0) {
+    db.data.pokemons = [
+      {
+        number: 1,
+        name: "Bulbasaur",
+        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+        type: "Planta",
+        subtype: "Venenoso",
+        description: "Pokémon semente. Possui uma semente em seu dorso que cresce com o tempo."
+      },
+      {
+        number: 4,
+        name: "Charmander",
+        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png",
+        type: "Fogo",
+        subtype: null,
+        description: "Pokémon lagarto. Um pequeno dinossauro com uma chama na ponta da cauda."
+      },
+      {
+        number: 7,
+        name: "Squirtle",
+        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
+        type: "Água",
+        subtype: null,
+        description: "Pokémon Tartaruga Minúscula. Um pequeno Pokémon tartaruga com uma carapaça resistente."
+      }
+    ];
+    await db.write();
   }
 
-  // Adiciona o novo Pokémon ao array
-  pokemons.push(newPokemon);
+  // Definição dos endpoints que interagem com os dados persistidos (db.data.pokemons):
 
-  // Retorna o novo Pokémon criado com status 201 (Created)
-  return res.status(201).json(newPokemon);
-});
+  // GET: Lista todos os pokémons
+  app.get('/api/pokemon', async (req, res) => {
+    await db.read();
+    res.json(db.data.pokemons);
+  });
 
+  // GET: Detalhes de um pokémon pelo número
+  app.get('/api/pokemon/:number', async (req, res) => {
+    await db.read();
+    const number = parseInt(req.params.number, 10);
+    const foundPokemon = db.data.pokemons.find(p => p.number === number);
+    if (foundPokemon) {
+      res.json(foundPokemon);
+    } else {
+      res.status(404).json({ error: "Pokémon not found" });
+    }
+  });
 
-//PUT
-// Endpoint PUT para atualizar um Pokémon existente identificado pelo seu número
-app.put('/api/pokemon/:number', (req, res) => {
-  const number = parseInt(req.params.number, 10);
-  const index = pokemons.findIndex(p => p.number === number);
+  // POST: Cria um novo Pokémon
+  app.post('/api/pokemon', async (req, res) => {
+    await db.read();
+    const newPokemon = req.body;
+    
+    // Validação dos campos obrigatórios.
+    if (!newPokemon.number || !newPokemon.name || !newPokemon.image || !newPokemon.type || !newPokemon.description) {
+      return res.status(400).json({ 
+        error: "Os campos 'number', 'name', 'image', 'type' e 'description' são obrigatórios." 
+      });
+    }
+    db.data.pokemons.push(newPokemon);
+    await db.write();
+    console.log("Novo Pokémon persistido:", newPokemon);
+    res.status(201).json(newPokemon);
+  });
 
-  if (index === -1) {
-    return res.status(404).json({ error: 'Pokémon not found' });
-  }
+  // PUT: Atualiza um Pokémon existente, identificado pelo número.
+  app.put('/api/pokemon/:number', async (req, res) => {
+    await db.read();
+    const number = parseInt(req.params.number, 10);
+    const index = db.data.pokemons.findIndex(p => p.number === number);
 
-  const updatedPokemon = req.body;
+    if (index === -1) {
+      return res.status(404).json({ error: 'Pokémon not found' });
+    }
 
-  // Validação: garantir que os campos essenciais estão presentes
-  if (!updatedPokemon.number || !updatedPokemon.name || !updatedPokemon.image || !updatedPokemon.type) {
-    return res.status(400).json({ error: "Os campos 'number', 'name', 'image' e 'type' são obrigatórios." });
-  }
+    const updatedPokemon = req.body;
+    if (!updatedPokemon.number || !updatedPokemon.name || !updatedPokemon.image || !updatedPokemon.type || !updatedPokemon.description) {
+      return res.status(400).json({ 
+        error: "Os campos 'number', 'name', 'image', 'type' e 'description' são obrigatórios." 
+      });
+    }
+    db.data.pokemons[index] = updatedPokemon;
+    await db.write();
+    res.json(updatedPokemon);
+  });
 
-  // Atualiza o registro
-  pokemons[index] = updatedPokemon;
+  // DELETE: Remove um Pokémon pelo número
+  app.delete('/api/pokemon/:number', async (req, res) => {
+    await db.read();
+    const number = parseInt(req.params.number, 10);
+    const index = db.data.pokemons.findIndex(p => p.number === number);
 
-  res.json(updatedPokemon);
-});
+    if (index === -1) {
+      return res.status(404).json({ error: 'Pokémon not found' });
+    }
 
-//DELETE
-// Endpoint DELETE para remover um Pokémon pelo número
-app.delete('/api/pokemon/:number', (req, res) => {
-  const number = parseInt(req.params.number, 10);
-  const index = pokemons.findIndex(p => p.number === number);
+    const removedPokemon = db.data.pokemons.splice(index, 1);
+    await db.write();
+    res.json(removedPokemon[0]);
+  });
 
-  if (index === -1) {
-    return res.status(404).json({ error: 'Pokémon not found' });
-  }
-
-  // Remove o Pokémon do array e retorna o registrado removido
-  const removedPokemon = pokemons.splice(index, 1);
-  
-  res.json(removedPokemon[0]);
-});
-
-
-//START SERVER
-// Inicia o servidor
-app.listen(port, () => {
-    console.log(`Servidor rodando na porta ${port}.`);
-});
+  // 3. INÍCIO DO SERVIDOR
+  // ======================
+  // Inicia o servidor apenas uma vez, após a configuração e inicialização do banco de dados.
+  app.listen(port, () => {
+    console.log(`Servidor rodando na porta ${port}`);
+  });
+})();

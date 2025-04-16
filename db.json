@@ -1,0 +1,36 @@
+{
+  "pokemons": [
+    {
+      "number": 1,
+      "name": "Bulbasaur",
+      "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/1.png",
+      "type": "Planta",
+      "subtype": "Venenoso",
+      "description": "Pokémon semente. Possui uma semente em seu dorso que cresce com o tempo."
+    },
+    {
+      "number": 4,
+      "name": "Charmander",
+      "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png",
+      "type": "Fogo",
+      "subtype": null,
+      "description": "Pokémon lagarto. Um pequeno dinossauro com uma chama na ponta da cauda."
+    },
+    {
+      "number": 7,
+      "name": "Squirtle",
+      "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
+      "type": "Água",
+      "subtype": null,
+      "description": "Pokémon Tartaruga Minúscula. Um pequeno Pokémon tartaruga com uma carapaça resistente."
+    },
+    {
+      "number": 25,
+      "name": "Pikachu",
+      "image": "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png",
+      "type": "El�trico",
+      "subtype": null,
+      "description": "Pok�mon el�trico. Conhecido por sua energia e agilidade no combate."
+    }
+  ]
+}
