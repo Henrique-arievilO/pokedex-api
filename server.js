@@ -3,6 +3,9 @@ const express = require('express');
 const app = express();
 const port = process.env.PORT || 3000;
 
+// Instrui o Express a utilizar seu parser interno para JSON
+app.use(express.json());
+
 // Endpoint básico: raiz da API
 app.get('/', (req, res) => {
     res.send('Hello, this is my Pokedex API!');
@@ -47,6 +50,22 @@ app.get('/api/pokemon/:number', (req, res) => {
   } else {
     res.status(404).json({ error: "Pokémon not found" });
   }
+});
+
+// Endpoint para criar um novo Pokémon
+app.post('/api/pokemon', (req, res) => {
+  const newPokemon = req.body;
+
+  // Validação simples: verificar se os campos obrigatórios foram enviados
+  if (!newPokemon.number || !newPokemon.name || !newPokemon.image || !newPokemon.type) {
+    return res.status(400).json({ error: "Os campos 'number', 'name', 'image' e 'type' são obrigatórios." });
+  }
+
+  // Adiciona o novo Pokémon ao array
+  pokemons.push(newPokemon);
+
+  // Retorna o novo Pokémon criado com status 201 (Created)
+  return res.status(201).json(newPokemon);
 });
 
 // Inicia o servidor
