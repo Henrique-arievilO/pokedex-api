@@ -7,6 +7,7 @@ import { JSONFile } from 'lowdb/node';
 import path from 'path';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
+import { body, validationResult } from 'express-validator';
 
 // Define __filename e __dirname (não estão disponíveis automaticamente em ESM)
 const __filename = fileURLToPath(import.meta.url);
@@ -92,43 +93,66 @@ app.get('/', (req, res) => {
     }
   });
 
-  // POST: Cria um novo Pokémon
-  app.post('/api/pokemon', async (req, res) => {
+  // POST: Cria um novo Pokémon com validação dos campos de entrada
+app.post(
+  '/api/pokemon',
+  [
+    body('number').isNumeric().withMessage('O campo number deve ser numérico.'),
+    body('name').notEmpty().withMessage('O campo name é obrigatório.'),
+    body('image').isURL().withMessage('O campo image deve ser uma URL válida.'),
+    body('type').notEmpty().withMessage('O campo type é obrigatório.'),
+    body('description').notEmpty().withMessage('O campo description é obrigatório.')
+  ],
+  async (req, res) => {
+    // Verifica se houve erros na validação
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+
     await db.read();
     const newPokemon = req.body;
-    
-    // Validação dos campos obrigatórios.
-    if (!newPokemon.number || !newPokemon.name || !newPokemon.image || !newPokemon.type || !newPokemon.description) {
-      return res.status(400).json({ 
-        error: "Os campos 'number', 'name', 'image', 'type' e 'description' são obrigatórios." 
-      });
-    }
+
     db.data.pokemons.push(newPokemon);
     await db.write();
     console.log("Novo Pokémon persistido:", newPokemon);
     res.status(201).json(newPokemon);
-  });
+  }
+);
 
-  // PUT: Atualiza um Pokémon existente, identificado pelo número.
-  app.put('/api/pokemon/:number', async (req, res) => {
+  // PUT: Atualiza um Pokémon existente, identificado pelo número, com validação dos campos de entrada
+app.put(
+  '/api/pokemon/:number',
+  [
+    body('number').isNumeric().withMessage('O campo number deve ser numérico.'),
+    body('name').notEmpty().withMessage('O campo name é obrigatório.'),
+    body('image').isURL().withMessage('O campo image deve ser uma URL válida.'),
+    body('type').notEmpty().withMessage('O campo type é obrigatório.'),
+    body('description').notEmpty().withMessage('O campo description é obrigatório.')
+  ],
+  async (req, res) => {
+    // Verifica se há erros de validação
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ errors: errors.array() });
+    }
+    
+    // Lê os dados atuais
     await db.read();
-    const number = parseInt(req.params.number, 10);
-    const index = db.data.pokemons.findIndex(p => p.number === number);
+    const numberParam = parseInt(req.params.number, 10);
+    const index = db.data.pokemons.findIndex(p => p.number === numberParam);
 
     if (index === -1) {
       return res.status(404).json({ error: 'Pokémon not found' });
     }
 
     const updatedPokemon = req.body;
-    if (!updatedPokemon.number || !updatedPokemon.name || !updatedPokemon.image || !updatedPokemon.type || !updatedPokemon.description) {
-      return res.status(400).json({ 
-        error: "Os campos 'number', 'name', 'image', 'type' e 'description' são obrigatórios." 
-      });
-    }
+    // Atualiza o registro
     db.data.pokemons[index] = updatedPokemon;
     await db.write();
     res.json(updatedPokemon);
-  });
+  }
+);
 
   // DELETE: Remove um Pokémon pelo número
   app.delete('/api/pokemon/:number', async (req, res) => {
