@@ -42,7 +42,7 @@ app.get('/', (req, res) => {
   // Lê os dados do arquivo; se estiver vazio, o lowdb já define db.data com a default data que passamos.
   await db.read();
 
-  // Se o array de pokémons estiver vazio (ou for a primeira vez), inicializa com os registros padrão.
+  // Se o array de pokémons estiver vazio (ou for a primeira vez), inicializa com o registro padrão.
   if (db.data.pokemons.length === 0) {
     db.data.pokemons = [
       {
@@ -52,22 +52,6 @@ app.get('/', (req, res) => {
         type: "Planta",
         subtype: "Venenoso",
         description: "Pokémon semente. Possui uma semente em seu dorso que cresce com o tempo."
-      },
-      {
-        number: 4,
-        name: "Charmander",
-        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png",
-        type: "Fogo",
-        subtype: null,
-        description: "Pokémon lagarto. Um pequeno dinossauro com uma chama na ponta da cauda."
-      },
-      {
-        number: 7,
-        name: "Squirtle",
-        image: "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/7.png",
-        type: "Água",
-        subtype: null,
-        description: "Pokémon Tartaruga Minúscula. Um pequeno Pokémon tartaruga com uma carapaça resistente."
       }
     ];
     await db.write();
@@ -94,65 +78,65 @@ app.get('/', (req, res) => {
   });
 
   // POST: Cria um novo Pokémon com validação dos campos de entrada
-app.post(
-  '/api/pokemon',
-  [
-    body('number').isNumeric().withMessage('O campo number deve ser numérico.'),
-    body('name').notEmpty().withMessage('O campo name é obrigatório.'),
-    body('image').isURL().withMessage('O campo image deve ser uma URL válida.'),
-    body('type').notEmpty().withMessage('O campo type é obrigatório.'),
-    body('description').notEmpty().withMessage('O campo description é obrigatório.')
-  ],
-  async (req, res) => {
-    // Verifica se houve erros na validação
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
+  app.post(
+    '/api/pokemon',
+    [
+      body('number').isNumeric().withMessage('O campo number deve ser numérico.'),
+      body('name').notEmpty().withMessage('O campo name é obrigatório.'),
+      body('image').isURL().withMessage('O campo image deve ser uma URL válida.'),
+      body('type').notEmpty().withMessage('O campo type é obrigatório.'),
+      body('description').notEmpty().withMessage('O campo description é obrigatório.')
+    ],
+    async (req, res) => {
+      // Verifica se houve erros na validação
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
+
+      await db.read();
+      const newPokemon = req.body;
+
+      db.data.pokemons.push(newPokemon);
+      await db.write();
+      console.log("Novo Pokémon persistido:", newPokemon);
+      res.status(201).json(newPokemon);
     }
-
-    await db.read();
-    const newPokemon = req.body;
-
-    db.data.pokemons.push(newPokemon);
-    await db.write();
-    console.log("Novo Pokémon persistido:", newPokemon);
-    res.status(201).json(newPokemon);
-  }
-);
+  );
 
   // PUT: Atualiza um Pokémon existente, identificado pelo número, com validação dos campos de entrada
-app.put(
-  '/api/pokemon/:number',
-  [
-    body('number').isNumeric().withMessage('O campo number deve ser numérico.'),
-    body('name').notEmpty().withMessage('O campo name é obrigatório.'),
-    body('image').isURL().withMessage('O campo image deve ser uma URL válida.'),
-    body('type').notEmpty().withMessage('O campo type é obrigatório.'),
-    body('description').notEmpty().withMessage('O campo description é obrigatório.')
-  ],
-  async (req, res) => {
-    // Verifica se há erros de validação
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return res.status(400).json({ errors: errors.array() });
-    }
-    
-    // Lê os dados atuais
-    await db.read();
-    const numberParam = parseInt(req.params.number, 10);
-    const index = db.data.pokemons.findIndex(p => p.number === numberParam);
+  app.put(
+    '/api/pokemon/:number',
+    [
+      body('number').isNumeric().withMessage('O campo number deve ser numérico.'),
+      body('name').notEmpty().withMessage('O campo name é obrigatório.'),
+      body('image').isURL().withMessage('O campo image deve ser uma URL válida.'),
+      body('type').notEmpty().withMessage('O campo type é obrigatório.'),
+      body('description').notEmpty().withMessage('O campo description é obrigatório.')
+    ],
+    async (req, res) => {
+      // Verifica se há erros de validação
+      const errors = validationResult(req);
+      if (!errors.isEmpty()) {
+        return res.status(400).json({ errors: errors.array() });
+      }
 
-    if (index === -1) {
-      return res.status(404).json({ error: 'Pokémon not found' });
-    }
+      // Lê os dados atuais
+      await db.read();
+      const numberParam = parseInt(req.params.number, 10);
+      const index = db.data.pokemons.findIndex(p => p.number === numberParam);
 
-    const updatedPokemon = req.body;
-    // Atualiza o registro
-    db.data.pokemons[index] = updatedPokemon;
-    await db.write();
-    res.json(updatedPokemon);
-  }
-);
+      if (index === -1) {
+        return res.status(404).json({ error: 'Pokémon not found' });
+      }
+
+      const updatedPokemon = req.body;
+      // Atualiza o registro
+      db.data.pokemons[index] = updatedPokemon;
+      await db.write();
+      res.json(updatedPokemon);
+    }
+  );
 
   // DELETE: Remove um Pokémon pelo número
   app.delete('/api/pokemon/:number', async (req, res) => {
@@ -168,11 +152,9 @@ app.put(
     await db.write();
     res.json(removedPokemon[0]);
   });
-
-  // 3. INÍCIO DO SERVIDOR
-  // ======================
-  // Inicia o servidor apenas uma vez, após a configuração e inicialização do banco de dados.
-  app.listen(port, () => {
-    console.log(`Servidor rodando na porta ${port}`);
-  });
 })();
+
+// 3. INÍCIO DO SERVIDOR
+// ======================
+// Exporta o app para que possa ser importado nos testes
+export default app;
