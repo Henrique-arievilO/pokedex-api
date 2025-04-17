@@ -136,7 +136,7 @@ app.get('/', (req, res) => {
  *                   description:
  *                     type: string
  *                     description: A brief description of the pokemon.
- *                     example: Pokémon seed that has a seed on its back which grows over time.
+ *                     example: Por algum tempo após o nascimento, ele usa os nutrientes contidos na semente em suas costas para crescer.
  */
 app.get('/api/pokemon', async (req, res) => {
   await db.read();
@@ -193,7 +193,7 @@ app.get('/api/pokemon', async (req, res) => {
  *                 description:
  *                   type: string
  *                   description: A brief description of the pokemon.
- *                   example: Pokémon seed that has a seed on its back which grows over time.
+ *                   example: Por algum tempo após o nascimento, ele usa os nutrientes contidos na semente em suas costas para crescer.
  *       404:
  *         description: The requested pokemon was not found in the database.
  */
@@ -273,10 +273,13 @@ app.get('/api/pokemon', async (req, res) => {
  *                   example: https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/4.png
  *                 type:
  *                   type: string
- *                   example: Fire
+ *                   example: Fogo
+ *                 subtype:
+ *                   type: string
+ *                   example: null
  *                 description:
  *                   type: string
- *                   example: A small lizard with a flame on its tail.
+ *                   example: A chama em sua cauda demonstra a força de sua força vital. Se Charmander estiver fraco, a chama também queimará fracamente.
  *       400:
  *         description: Input validation failed. Returns the validation errors.
  */
@@ -352,11 +355,11 @@ app.get('/api/pokemon', async (req, res) => {
  *               type:
  *                 type: string
  *                 description: The primary type of the pokemon.
- *                 example: Grass
+ *                 example: Planta
  *               description:
  *                 type: string
  *                 description: A brief description of the pokemon.
- *                 example: A stronger and evolved version of Bulbasaur.
+ *                 example: Quanto mais luz do sol Ivysaur recebe, mais força brota dentro dele, permitindo que o broto em suas costas cresça mais.
  *     responses:
  *       200:
  *         description: The pokemon was updated successfully.
@@ -377,10 +380,13 @@ app.get('/api/pokemon', async (req, res) => {
  *                   example: https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/2.png
  *                 type:
  *                   type: string
- *                   example: Grass
+ *                   example: Planta
+ *                 subtype:
+ *                   type: string
+ *                   example: Venenoso
  *                 description:
  *                   type: string
- *                   example: A stronger and evolved version of Bulbasaur.
+ *                   example: Quanto mais luz do sol Ivysaur recebe, mais força brota dentro dele, permitindo que o broto em suas costas cresça mais.
  *       400:
  *         description: Input validation failed. Returns the validation errors.
  *       404:
