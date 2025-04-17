@@ -249,10 +249,13 @@ app.get('/api/pokemon', async (req, res) => {
  *                 type: string
  *                 description: The primary type of the pokemon.
  *                 example: Fire
+ *               subtype:
+ *                 type: sting
+ *                  description:
  *               description:
  *                 type: string
  *                 description: A brief description of the pokemon.
- *                 example: A small lizard with a flame on its tail.
+ *                 example: A chama em sua cauda demonstra a força de sua força vital. Se Charmander estiver fraco, a chama também queimará fracamente.
  *     responses:
  *       201:
  *         description: The pokemon was created successfully.
@@ -276,6 +279,7 @@ app.get('/api/pokemon', async (req, res) => {
  *                   example: Fogo
  *                 subtype:
  *                   type: string
+ *                   description: The secondary type of the pokemon.
  *                   example: null
  *                 description:
  *                   type: string
@@ -356,6 +360,10 @@ app.get('/api/pokemon', async (req, res) => {
  *                 type: string
  *                 description: The primary type of the pokemon.
  *                 example: Planta
+ *               subtype:
+ *                 type: string
+ *                 description: The secondary type of the pokemon.
+ *                 example: Venenoso
  *               description:
  *                 type: string
  *                 description: A brief description of the pokemon.
