@@ -484,7 +484,7 @@ app.get('/api/pokemon', async (req, res) => {
  *                   example: Venenoso
  *                 description:
  *                   type: string
- *                   example: Pokémon seed that has a seed on its back which grows over time.
+ *                   example: Por algum tempo após o nascimento, ele usa os nutrientes contidos na semente em suas costas para crescer.
  *       404:
  *         description: Pokemon not found.
  */
