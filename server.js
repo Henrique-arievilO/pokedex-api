@@ -250,7 +250,7 @@ app.get('/api/pokemon', async (req, res) => {
  *                 description: The primary type of the pokemon.
  *                 example: Fire
  *               subtype:
- *                 type: sting
+ *                 type: string
  *                  description:
  *               description:
  *                 type: string
