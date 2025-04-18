@@ -1,6 +1,9 @@
 // 1. IMPORTS E CONFIGURAÇÕES INICIAIS
 // =====================================
 // Importa os módulos necessários:
+// Configuração do dotenv - carregando variáveis de ambiente
+import dotenv from 'dotenv';
+dotenv.config();
 import express from 'express';
 import { Low } from 'lowdb';
 import { JSONFile } from 'lowdb/node';

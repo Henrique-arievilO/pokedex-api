@@ -1,0 +1,29 @@
+# Diretório com módulos do Node.js
+node_modules/
+
+# Arquivo de variáveis de ambiente (dotenv)
+.env
+
+# Logs e arquivos de depuração
+logs/
+*.log
+npm-debug.log*
+
+# Arquivos gerados pelo sistema operacional
+.DS_Store
+Thumbs.db
+
+# Pastas e arquivos de editores e IDEs
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+*.iml
+
+# Pastas de build (caso existam)
+dist/
+build/
+
+# Arquivos e pastas temporários
+tmp/
+temp/
