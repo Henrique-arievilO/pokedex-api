@@ -11,7 +11,8 @@ import path from 'path';
 import cors from 'cors';
 import { fileURLToPath } from 'url';
 import { body, validationResult } from 'express-validator';
-// Importa a configuração do Swagger
+import helmet from 'helmet';
+import rateLimit from 'express-rate-limit';
 import { swaggerUi, swaggerSpec } from './config/swagger.js';
 
 // Define __filename e __dirname (não estão disponíveis automaticamente em ESM)
@@ -34,6 +35,18 @@ const db = new Low(adapter, { default: { pokemons: [] } });
 app.use(express.json());
 // - Habilita o CORS para todas as requisições
 app.use(cors());
+// Configura os cabeçalhos de segurança
+app.use(helmet());
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutos
+  max: 100, // máximo de requisições por IP nesse período
+  message: "Muitas requisições vindas do mesmo IP, tente novamente mais tarde."
+});
+
+
+// Aplica o rate limiter em todas as rotas
+app.use(limiter);
+
 // Documentação Swagger
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
