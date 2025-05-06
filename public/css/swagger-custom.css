@@ -1,0 +1,24 @@
+.swagger-ui .topbar .link::before {
+  content: "";
+  display: inline-block;
+  width: 40px;
+  height: 40px;
+  background: url('../img/pokeball.png') no-repeat center center !important;
+  background-size: contain !important;
+}
+.swagger-ui .topbar,
+.swagger-ui .scheme-container {
+  background-color: #cc0000;
+  color: #ffffff !important;
+}
+
+.swagger-ui #model-Pokemon{
+  background-color: #ffffff;
+}
+.swagger-ui .info .title {
+  color: #141414;
+}
+.swagger-ui .info .description .renderedMarkdown {
+  background-color: #f7f7f7 !important;
+  color: #212121 !important;
+}
