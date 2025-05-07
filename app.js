@@ -7,6 +7,7 @@ import swaggerOptions from './config/swagger/swaggerOptions.js';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import dbConnect from './config/database/dbConnect.js'
 
 const app = express();
 const __filename = fileURLToPath(import.meta.url);
